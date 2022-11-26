@@ -1,4 +1,5 @@
 import pytest
+from eip712.messages import EIP712Message
 
 
 @pytest.fixture(scope="session")
@@ -19,3 +20,20 @@ def weth(request, deployer, project):
 
     # Deploy a contract using our deployer
     return deployer.deploy(weth_contract_type)
+
+
+@pytest.fixture
+def Permit(chain, weth):
+    class Permit(EIP712Message):
+        _name_: "string" = weth.name()
+        _version_: "string" = "1"
+        _chainId_: "uint256" = chain.chain_id
+        _verifyingContract_: "address" = weth.address
+
+        owner: "address"
+        spender: "address"
+        value: "uint256"
+        nonce: "uint256"
+        deadline: "uint256"
+
+    return Permit
