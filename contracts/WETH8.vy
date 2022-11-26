@@ -66,7 +66,8 @@ def transfer(receiver: address, amount: uint256) -> bool:
     assert receiver not in [empty(address), self]
 
     self.balanceOf[msg.sender] -= amount
-    self.balanceOf[receiver] += amount
+    # NOTE: `unsafe_add` is safe here because there is a limited amount of ether <<< max(uint256)
+    self.balanceOf[receiver] = unsafe_add(self.balanceOf[receiver], amount)
 
     log Transfer(msg.sender, receiver, amount)
     return True
@@ -78,7 +79,8 @@ def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
 
     self.allowance[sender][msg.sender] -= amount
     self.balanceOf[sender] -= amount
-    self.balanceOf[receiver] += amount
+    # NOTE: `unsafe_add` is safe here because of total supply invariant
+    self.balanceOf[receiver] = unsafe_add(self.balanceOf[receiver], amount)
 
     log Transfer(sender, receiver, amount)
     return True
@@ -119,7 +121,8 @@ def withdraw(amount: uint256) -> bool:
 @internal
 def _mint(receiver: address, amount: uint256):
     # NOTE: totalSupply increases here by `amount`
-    self.balanceOf[receiver] += amount
+    # NOTE: `unsafe_add` is safe here because there is a limited amount of ether <<< max(uint256)
+    self.balanceOf[receiver] = unsafe_add(self.balanceOf[receiver], amount)
     log Transfer(empty(address), receiver, amount)
 
 
