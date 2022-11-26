@@ -17,7 +17,6 @@ symbol: public(constant(String[5])) = "WETH"
 decimals: public(constant(uint8)) = 18
 
 # ERC20 State Variables
-totalSupply: public(uint256)
 balanceOf: public(HashMap[address, uint256])
 allowance: public(HashMap[address, HashMap[address, uint256]])
 
@@ -54,6 +53,12 @@ def __init__():
             _abi_encode(chain.id, self)
         )
     )
+
+
+@view
+@external
+def totalSupply() -> uint256:
+    return self.balance
 
 
 @external
@@ -94,8 +99,8 @@ def approve(spender: address, amount: uint256) -> bool:
 
 @internal
 def _burn(owner: address, amount: uint256):
+    # NOTE: totalSupply decreases here by `amount`
     self.balanceOf[owner] -= amount
-    self.totalSupply -= amount
     log Transfer(owner, empty(address), amount)
 
 
@@ -113,7 +118,7 @@ def withdraw(amount: uint256) -> bool:
 
 @internal
 def _mint(receiver: address, amount: uint256):
-    self.totalSupply += amount
+    # NOTE: totalSupply increases here by `amount`
     self.balanceOf[receiver] += amount
     log Transfer(empty(address), receiver, amount)
 
