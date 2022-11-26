@@ -1,0 +1,14 @@
+name: WETH8
+plugins:
+  # So we can compile WETH9 and WETH10
+  - name: solidity
+  # So we can compile our project
+  - name: vyper
+
+dependencies:
+  - name: weth9
+    github: tongyuhu/weth9
+    branch: master
+  - name: weth10
+    github: WETH10/WETH10
+    branch: main
