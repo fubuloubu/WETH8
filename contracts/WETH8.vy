@@ -73,7 +73,9 @@ def __init__():
 @view
 @external
 def totalSupply() -> uint256:
-    return self.balance + self.flashMinted
+    # NOTE: Safe because ether balance is <<< max(uint256)
+    #       and `flashMinted` is limited to 1% of total ether
+    return unsafe_add(self.balance, self.flashMinted)
 
 
 @external
