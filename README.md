@@ -25,6 +25,10 @@ and count down to version 0, at which point the software is considered finished 
 In the spirit of that original, we are decrementing this number by 1 to indicate the level of progress this implementation is making towards a
 final, more immutable copy.
 
+## Deployments
+
+This contract is deployed on Goerli at: [0xD2082D10e36b169f4F2331867dcc1A719297037e](https://goerli.etherscan.io/address/0xd2082d10e36b169f4f2331867dcc1a719297037e)
+
 ## Credits
 
 This project draws singificant inspiration from WETH(10) both in terms of goals and several of the upgrades that are applied.
