@@ -41,6 +41,21 @@ PERMIT_TYPE_HASH: constant(bytes32) = keccak256(
     "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
 )
 
+# Flash Minting
+
+interface FlashBorrower:
+    def onFlashLoan(
+        caller: address,
+        token: address,
+        amount: uint256,
+        fee: uint256,
+        data: Bytes[65535],
+    ) -> bytes32: nonpayable
+
+ERC3156_CALLBACK_SUCCESS: constant(bytes32) = keccak256("ERC3156FlashBorrower.onFlashLoan")
+
+flashMinted: public(uint256)
+
 
 @external
 def __init__():
@@ -58,7 +73,7 @@ def __init__():
 @view
 @external
 def totalSupply() -> uint256:
-    return self.balance
+    return self.balance + self.flashMinted
 
 
 @external
@@ -193,4 +208,38 @@ def permit(
     self.nonces[owner] = nonce + 1
 
     log Approval(owner, spender, amount)
+    return True
+
+
+@view
+@external
+def maxFlashLoan(token: address) -> uint256:
+    if token != self:
+        return 0
+
+    return self.balance / 100  # 1% of total supply
+
+
+@view
+@external
+def flashFee(token: address, amount: uint256) -> uint256:
+    assert token == self
+    return 0
+
+
+@external
+def flashLoan(receiver: address, token: address, amount: uint256, data: Bytes[65535]) -> bool:
+    assert token == self
+    minted: uint256 = self.flashMinted
+    # NOTE: Can't violate minting invariant of 1%
+    assert minted + amount <= self.balance / 100
+
+    self._mint(receiver, amount)
+    self.flashMinted = minted + amount
+
+    assert FlashBorrower(receiver).onFlashLoan(msg.sender, self, amount, 0, data) == ERC3156_CALLBACK_SUCCESS
+
+    self._burn(receiver, amount)
+    self.flashMinted = minted
+
     return True
