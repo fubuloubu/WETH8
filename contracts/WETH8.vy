@@ -90,11 +90,21 @@ def transfer(receiver: address, amount: uint256) -> bool:
     return True
 
 
+@internal
+def _setAllowance(owner: address, spender: address, allowance: uint256):
+    self.allowance[owner][spender] = allowance
+    log Approval(owner, spender, allowance)
+
+
 @external
 def transferFrom(sender: address, receiver: address, amount: uint256) -> bool:
     assert receiver not in [empty(address), self]
 
-    self.allowance[sender][msg.sender] -= amount
+    allowance: uint256 = self.allowance[sender][msg.sender]
+    if allowance < max_value(uint256):
+        # NOTE: Only decrement if less than `max(uint256)`
+        self._setAllowance(sender, msg.sender, allowance - amount)
+
     self.balanceOf[sender] -= amount
     # NOTE: `unsafe_add` is safe here because of total supply invariant
     self.balanceOf[receiver] = unsafe_add(self.balanceOf[receiver], amount)
@@ -110,9 +120,7 @@ def approve(spender: address, amount: uint256) -> bool:
     @param amount The amount of token to be transfered.
     @return A boolean that indicates if the operation was successful.
     """
-    self.allowance[msg.sender][spender] = amount
-
-    log Approval(msg.sender, spender, amount)
+    self._setAllowance(msg.sender, spender, amount)
     return True
 
 
@@ -206,10 +214,9 @@ def permit(
 
     assert ecrecover(digest, v, r, s) == owner  # dev: invalid signature
 
-    self.allowance[owner][spender] = amount
+    self._setAllowance(owner, spender, amount)
     self.nonces[owner] = nonce + 1
 
-    log Approval(owner, spender, amount)
     return True
 
 
@@ -240,6 +247,12 @@ def flashLoan(receiver: address, token: address, amount: uint256, data: Bytes[65
     self.flashMinted = minted + amount
 
     assert FlashBorrower(receiver).onFlashLoan(msg.sender, self, amount, 0, data) == ERC3156_CALLBACK_SUCCESS
+
+    # NOTE: According to ERC3156, `receiver` must set an approval for this contract
+    allowance: uint256 = self.allowance[receiver][self]
+    if allowance < max_value(uint256):
+        # NOTE: Only decrement if less than `max(uint256)`
+        self._setAllowance(receiver, self, allowance - amount)
 
     self._burn(receiver, amount)
     self.flashMinted = minted

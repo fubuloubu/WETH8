@@ -19,6 +19,7 @@ def onFlashLoan(
         # NOTE: by default, try withdrawing and depositing again
         assert token.withdraw(amount)
         assert token.deposit(value=amount)
+        assert token.approve(msg.sender, amount)
 
     return ERC3156_CALLBACK_SUCCESS
 
