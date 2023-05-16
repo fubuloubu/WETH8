@@ -29,9 +29,4 @@ def test_permit(chain, weth, accounts, Permit):
 
     assert weth.allowance(owner, spender) == 100
 
-    logs = list(tx.decode_logs(weth.Approval))
-    assert len(logs) == 1
-    src, guy, amt = logs[0].event_arguments.values()
-    assert src == owner
-    assert guy == spender
-    assert amt == 100
+    assert tx.events == [weth.Approval(owner, spender, 100)]

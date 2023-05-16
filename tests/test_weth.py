@@ -30,18 +30,12 @@ def test_deposit_by_call(weth, accounts):
     assert weth.totalSupply() == ONE_ETHER
 
     if weth.contract_type.name == "WETH9":
-        logs = list(tx.decode_logs(weth.Deposit))
-        assert len(logs) == 1
-        assert logs[0].dst == owner
-        assert logs[0].wad == ONE_ETHER
+        expected_event = weth.Deposit(owner, ONE_ETHER)
 
     else:
-        logs = list(tx.decode_logs(weth.Transfer))
-        assert len(logs) == 1
-        sender, receiver, amount = logs[0].event_arguments.values()
-        assert sender == ZERO_ADDRESS
-        assert receiver == owner
-        assert amount == ONE_ETHER
+        expected_event = weth.Transfer(ZERO_ADDRESS, owner, ONE_ETHER)
+
+    assert tx.events == [expected_event]
 
 
 def test_deposit_by_send(weth, accounts):
@@ -56,18 +50,12 @@ def test_deposit_by_send(weth, accounts):
     assert weth.totalSupply() == ONE_ETHER
 
     if weth.contract_type.name == "WETH9":
-        logs = list(tx.decode_logs(weth.Deposit))
-        assert len(logs) == 1
-        assert logs[0].dst == owner
-        assert logs[0].wad == ONE_ETHER
+        expected_event = weth.Deposit(owner, ONE_ETHER)
 
     else:
-        logs = list(tx.decode_logs(weth.Transfer))
-        assert len(logs) == 1
-        sender, receiver, amount = logs[0].event_arguments.values()
-        assert sender == ZERO_ADDRESS
-        assert receiver == owner
-        assert amount == ONE_ETHER
+        expected_event = weth.Transfer(ZERO_ADDRESS, owner, ONE_ETHER)
+
+    assert tx.events == [expected_event]
 
 
 def test_withdraw(weth, accounts):
@@ -84,18 +72,12 @@ def test_withdraw(weth, accounts):
     assert weth.totalSupply() == 0
 
     if weth.contract_type.name == "WETH9":
-        logs = list(tx.decode_logs(weth.Withdrawal))
-        assert len(logs) == 1
-        assert logs[0].src == owner
-        assert logs[0].wad == ONE_ETHER
+        expected_event = weth.Withdrawal(owner, ONE_ETHER)
 
     else:
-        logs = list(tx.decode_logs(weth.Transfer))
-        assert len(logs) == 1
-        src, dst, amt = logs[0].event_arguments.values()
-        assert src == owner
-        assert dst == ZERO_ADDRESS
-        assert amt == ONE_ETHER
+        expected_event = weth.Transfer(owner, ZERO_ADDRESS, ONE_ETHER)
+
+    assert tx.events == [expected_event]
 
 
 def test_transfer(weth, accounts):
@@ -109,12 +91,7 @@ def test_transfer(weth, accounts):
     assert weth.balanceOf(receiver) == 100
     assert weth.balanceOf(owner) == ONE_ETHER - 100
 
-    logs = list(tx.decode_logs(weth.Transfer))
-    assert len(logs) == 1
-    src, dst, amt = logs[0].event_arguments.values()
-    assert src == owner
-    assert dst == receiver
-    assert amt == 100
+    assert tx.events == [weth.Transfer(owner, receiver, 100)]
 
     # Expected insufficient funds failure
     with ape.reverts():
@@ -130,12 +107,7 @@ def test_approve(weth, accounts):
 
     assert weth.allowance(owner, spender) == 300
 
-    logs = list(tx.decode_logs(weth.Approval))
-    assert len(logs) == 1
-    src, guy, amt = logs[0].event_arguments.values()
-    assert src == owner
-    assert guy == spender
-    assert amt == 300
+    assert tx.events == [weth.Approval(owner, spender, 300)]
 
 
 def test_transfer_from(weth, accounts):
@@ -155,12 +127,14 @@ def test_transfer_from(weth, accounts):
     assert weth.balance == ONE_ETHER
     assert weth.allowance(owner, spender) == 100
 
-    logs = list(tx.decode_logs(weth.Transfer))
-    assert len(logs) == 1
-    sender, receiver, amount = logs[0].event_arguments.values()
-    assert sender == owner
-    assert receiver == receiver
-    assert amount == 200
+    if weth.contract_type.name == "WETH9":
+        assert tx.events == [weth.Transfer(owner, receiver, 200)]
+    else:
+        # NOTE: More modern implementations also emit allowance change events
+        assert tx.events == [
+            weth.Approval(owner, spender, 100),
+            weth.Transfer(owner, receiver, 200),
+        ]
 
     # Cannot exceed authorized allowance
     with ape.reverts():
