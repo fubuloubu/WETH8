@@ -7,7 +7,7 @@ def deployer(accounts):
     return accounts[-1]
 
 
-@pytest.fixture(params=["WETH8", "WETH9", "WETH10"])
+@pytest.fixture(params=["WETH8", "WETH9", "WETH10", "METH_WETH"])
 def weth(request, deployer, project):
     if request.param == "WETH8":
         # Use a type from our project
