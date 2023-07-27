@@ -18,6 +18,13 @@ def weth(request, deployer, project):
         dependency = list(project.dependencies.get(request.param.lower()).values())[0]
         weth_contract_type = dependency.get(request.param)
 
+    if request.param == "METH_WETH":
+        # NOTE: METH is set up to be deployed via some method involving CREATE2, so just hack it
+        weth_contract_type.contract_type.deployment_bytecode.bytecode = (
+            "0x600b80380380913d393df3"
+            + weth_contract_type.contract_type.deployment_bytecode.bytecode[2:]
+        )
+
     # Deploy a contract using our deployer
     return deployer.deploy(weth_contract_type)
 
