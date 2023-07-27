@@ -8,8 +8,8 @@ def borrower(project, deployer):
 
 
 def test_max_flash(weth, accounts):
-    if weth.contract_type.name == "WETH9":
-        pytest.skip("WETH9 doesn't support ERC-3156")
+    if weth.contract_type.name in ("WETH9", "METH_WETH"):
+        pytest.skip(f"{weth.contract_type.name} doesn't support ERC-3156")
 
     caller = accounts[0]
 
@@ -28,8 +28,8 @@ def test_max_flash(weth, accounts):
 
 
 def test_flash_fee(weth, accounts):
-    if weth.contract_type.name == "WETH9":
-        pytest.skip("WETH9 doesn't support ERC-3156")
+    if weth.contract_type.name in ("WETH9", "METH_WETH"):
+        pytest.skip(f"{weth.contract_type.name} doesn't support ERC-3156")
 
     caller = accounts[0]
 
@@ -42,8 +42,8 @@ def test_flash_fee(weth, accounts):
 
 
 def test_flash_loan(weth, borrower, accounts):
-    if weth.contract_type.name == "WETH9":
-        pytest.skip("WETH9 doesn't support ERC-3156")
+    if weth.contract_type.name in ("WETH9", "METH_WETH"):
+        pytest.skip(f"{weth.contract_type.name} doesn't support ERC-3156")
 
     caller = accounts[0]
 
