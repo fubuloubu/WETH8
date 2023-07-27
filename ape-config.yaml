@@ -10,13 +10,13 @@ plugins:
 dependencies:
   - name: weth9
     github: tongyuhu/weth9
-    branch: master
+    ref: master
   - name: weth10
     github: WETH10/WETH10
-    branch: main
+    ref: main
   - name: meth_weth
     github: Philogy/meth-weth
-    branch: main
+    ref: main
     contracts_folder: src
 
 solidity:
