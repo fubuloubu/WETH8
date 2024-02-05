@@ -8,7 +8,7 @@ plugins:
 dependencies:
   - name: weth9
     github: tongyuhu/weth9
-    branch: master
+    ref: master
   - name: weth10
     github: WETH10/WETH10
-    branch: main
+    ref: main
