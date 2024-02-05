@@ -66,8 +66,6 @@ def test_flash_loan(weth, borrower, accounts):
         # Fails because trying to balance more than available
         weth.flashLoan(borrower, weth, "0.011 ether", b"", sender=caller)
 
-    if weth.contract_type.name == "WETH10":
-        # NOTE: WETH10 requires that the borrower approve the weth account for returning tokens
-        weth.approve(weth, "0.01 ether", sender=borrower)
-
+    # NOTE: spec requires that the borrower approve the weth address for returning tokens
+    weth.approve(weth, "0.01 ether", sender=caller)
     weth.flashLoan(borrower, weth, "0.01 ether", b"", sender=caller)
