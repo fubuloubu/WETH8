@@ -1,4 +1,5 @@
-# @version 0.3.7
+# @version 0.3.10
+# pragma evm-version cancun
 """
 @title WETH8
 @license MIT
@@ -54,7 +55,7 @@ interface FlashBorrower:
 
 ERC3156_CALLBACK_SUCCESS: constant(bytes32) = keccak256("ERC3156FlashBorrower.onFlashLoan")
 
-flashMinted: public(uint256)
+flashMinted: public(transient(uint256))
 
 
 @external

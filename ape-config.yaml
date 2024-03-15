@@ -4,11 +4,18 @@ plugins:
   - name: solidity
   # So we can compile our project
   - name: vyper
+  # So we can test using traces
+  - name: foundry
+
+ethereum:
+  local:
+    # Make sure we are using a tracing provider by default
+    default_provider: foundry
 
 dependencies:
   - name: weth9
     github: tongyuhu/weth9
-    branch: master
+    ref: master
   - name: weth10
     github: WETH10/WETH10
-    branch: main
+    ref: main
